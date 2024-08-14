@@ -3,6 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
 import random
+import textwrap
 
 # Функция для поиска и перехода на страницу по запросу пользователя
 def search_wikipedia(query):
@@ -10,7 +11,7 @@ def search_wikipedia(query):
     search_box.clear()
     search_box.send_keys(query)
     search_box.send_keys(Keys.RETURN)
-    time.sleep(10)  # Ждем загрузки страницы
+    time.sleep(5)  # Ждем загрузки страницы
     # Находим и кликаем на ссылку
     a = browser.find_element(By.LINK_TEXT, query)
     a.click()
@@ -19,8 +20,10 @@ def search_wikipedia(query):
 def browse_paragraphs():
     paragraphs = browser.find_elements(By.TAG_NAME, "p")
     for paragraph in paragraphs:
-        print(paragraph.text)
-        if input("Нажмите Enter для получения следующего параграфа или введите 'q' для выхода: ").lower() == 'q':
+        wrapped_text = textwrap.fill(paragraph.text, width=80)  # Разбиваем текст на строки по ширине экрана
+        print(wrapped_text)
+        if input("Нажмите Enter для получения следующего параграфа или введите 'q' для выхода: \n").lower() == 'q':
+            print("\n")
             break
 
 # Функция для перехода на связанную страницу
@@ -43,7 +46,7 @@ def go_to_related_page():
 def perform_new_search():
     new_query = input("Введите новый запрос для поиска на Википедии: ")
     search_wikipedia(new_query)
-    time.sleep(3)
+
 # Основная программа
 if __name__ == "__main__":
     browser = webdriver.Firefox()
@@ -51,14 +54,13 @@ if __name__ == "__main__":
     try:
 
         browser.get("https://ru.wikipedia.org")
-        time.sleep(5)
         # Проверяем, что сайт открылся правильно
         assert "Википедия" in browser.title
-        time.sleep(10)
+        time.sleep(5)
         # Запрос у пользователя первоначального запроса
         initial_query = input("Введите запрос для поиска на Википедии: ")
         search_wikipedia(initial_query)
-        time.sleep(3)
+
         while True:
             print("\nВыберите действие:")
             print("1. Листать параграфы текущей статьи")
@@ -69,20 +71,15 @@ if __name__ == "__main__":
 
             if choice == '1':
                 browse_paragraphs()
-                time.sleep(3)  # Ждем загрузки страницы
             elif choice == '2':
                 go_to_related_page()
-                time.sleep(3)  # Ждем загрузки страницы
                 sub_choice = input("\nВыберите действие:\n1. Листать параграфы новой статьи\n2. Перейти на связанную страницу\nВведите номер действия: ")
                 if sub_choice == '1':
                     browse_paragraphs()
-                    time.sleep(3)  # ��дем загрузки страницы
                 elif sub_choice == '2':
                     go_to_related_page()
-                    time.sleep(3)  # ��дем загрузки страницы
             elif choice == '3':
                 perform_new_search()
-                time.sleep(3)  # Ждем загрузки страницы
             elif choice == '4':
                 print("Выход из программы...")
                 break
